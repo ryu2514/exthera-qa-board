@@ -1000,6 +1000,26 @@
         }
 
         // ═══════════════════════════════════
+        //  Discord Notification
+        // ═══════════════════════════════════
+        async function notifyDiscord(type, data) {
+            try {
+                // Send notification request to Vercel Serverless Function
+                await fetch('/api/notify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type,
+                        [type]: data,
+                        url: window.location.origin + window.location.pathname
+                    })
+                });
+            } catch (e) {
+                console.error('Failed to notify Discord:', e);
+            }
+        }
+
+        // ═══════════════════════════════════
         //  Event Handlers
         // ═══════════════════════════════════
         questionForm.addEventListener('submit', async (e) => {
@@ -1010,11 +1030,13 @@
             qSubmitBtn.textContent = '投稿中…';
             try {
                 if (USE_FIREBASE && db) {
-                    await fbAddDoc(fbCollection(db, 'questions'), {
+                    const newQuestion = {
                         name: qName.value.trim() || '匿名',
                         content,
                         createdAt: fbServerTimestamp()
-                    });
+                    };
+                    await fbAddDoc(fbCollection(db, 'questions'), newQuestion);
+                    notifyDiscord('question', newQuestion);
                 } else {
                     submitQuestionLocal(qName.value.trim(), content);
                 }
@@ -1051,13 +1073,15 @@
             submitBtn.textContent = '投稿中…';
             try {
                 if (USE_FIREBASE && db) {
-                    await fbAddDoc(fbCollection(db, 'answers'), {
+                    const newAnswer = {
                         questionId,
                         name: isOwner ? 'オーナー' : (nameEl.value.trim() || '匿名'),
                         content,
                         isOwner,
                         createdAt: fbServerTimestamp()
-                    });
+                    };
+                    await fbAddDoc(fbCollection(db, 'answers'), newAnswer);
+                    notifyDiscord('answer', newAnswer);
                 } else {
                     submitAnswerLocal(questionId, nameEl.value.trim(), content, isOwner);
                 }
