@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>質問箱 | Exthera School</title>
+    <meta name="description" content="Exthera Schoolの質問掲示板。臨床の疑問を気軽に投稿し、仲間やオーナーから回答を受け取ろう。">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #f7f7fb;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f0f0f8;
+            --bg-input: #f2f2f8;
+            --border: #e2e2ee;
+            --border-focus: #6c63ff;
+            --text-primary: #1a1a2e;
+            --text-secondary: #5a5a70;
+            --text-muted: #9090a8;
+            --accent: #6c63ff;
+            --accent-hover: #5b52e0;
+            --accent-glow: rgba(108, 99, 255, 0.10);
+            --owner-badge: #e8870a;
+            --owner-bg: rgba(232, 135, 10, 0.06);
+            --owner-border: rgba(232, 135, 10, 0.25);
+            --success: #16a34a;
+            --danger: #dc2626;
+            --answer-accent: #16a34a;
+            --answer-bg: rgba(22, 163, 74, 0.04);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 6px 24px rgba(0, 0, 0, 0.1);
+            --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Header ── */
+        .header {
+            background: rgba(255, 255, 255, 0.85);
+            border-bottom: 1px solid var(--border);
+            padding: 1.5rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .header-inner {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-logo {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        .header-logo span {
+            color: var(--accent);
+        }
+
+        .header-badge {
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: var(--accent);
+            background: var(--accent-glow);
+            border: 1px solid rgba(108, 99, 255, 0.3);
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .header-stats {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .header-stats strong {
+            color: var(--text-secondary);
+        }
+
+        /* ── Main Layout ── */
+        .main {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 4rem;
+        }
+
+        /* ── Hero ── */
+        .hero {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            padding: 2rem 0;
+        }
+
+        .hero h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #2d2d4e, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* ── Question Form ── */
+        .question-form-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 2.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .form-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-title::before {
+            content: '✍️';
+        }
+
+        .form-row {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0.4rem;
+        }
+
+        .form-label .optional {
+            color: var(--text-muted);
+            font-weight: 400;
+            margin-left: 0.3rem;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 1rem;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: border-color var(--transition);
+            outline: none;
+            resize: vertical;
+        }
+
+        input[type="text"]::placeholder,
+        textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        textarea {
+            min-height: 100px;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.65rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            box-shadow: 0 4px 16px rgba(108, 99, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+
+        .btn-sm {
+            padding: 0.45rem 1rem;
+            font-size: 0.8rem;
+        }
+
+        /* ── Question List ── */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.2rem;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .question-count {
+            background: var(--accent-glow);
+            color: var(--accent);
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.15rem 0.6rem;
+            border-radius: 20px;
+        }
+
+        .question-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        /* ── Question Card ── */
+        .question-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: border-color var(--transition);
+            box-shadow: var(--shadow);
+        }
+
+        .question-card:hover {
+            border-color: rgba(108, 99, 255, 0.3);
+        }
+
+        .question-main {
+            padding: 1.25rem 1.5rem;
+            cursor: pointer;
+        }
+
+        .question-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.6rem;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .question-author {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .question-author .avatar {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), #a78bfa);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .question-content {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .question-footer {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 0.8rem;
+        }
+
+        .answer-count-badge {
+            font-size: 0.78rem;
+            color: var(--answer-accent);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .expand-indicator {
+            margin-left: auto;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            transition: color var(--transition);
+        }
+
+        .question-card:hover .expand-indicator {
+            color: var(--accent);
+        }
+
+        /* ── Answers Section ── */
+        .answers-section {
+            display: none;
+            border-top: 1px solid var(--border);
+            background: #f9f9fd;
+        }
+
+        .answers-section.open {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .answers-list {
+            padding: 1rem 1.5rem;
+        }
+
+        .answer-item {
+            padding: 0.8rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .answer-item:last-child {
+            border-bottom: none;
+        }
+
+        .answer-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.3rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .answer-author {
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .owner-badge {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--owner-badge);
+            background: rgba(245, 166, 35, 0.12);
+            border: 1px solid var(--owner-border);
+            padding: 0.1rem 0.5rem;
+            border-radius: 4px;
+            letter-spacing: 0.03em;
+        }
+
+        .answer-item.is-owner {
+            background: var(--owner-bg);
+            border-left: 3px solid var(--owner-badge);
+            padding-left: 1rem;
+            margin: 0.5rem 0;
+            border-radius: var(--radius-sm);
+        }
+
+        .answer-content {
+            font-size: 0.88rem;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .no-answers {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* ── Answer Form ── */
+        .answer-form {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border);
+            background: #f5f5fa;
+        }
+
+        .answer-form textarea {
+            min-height: 70px;
+            margin-bottom: 0.75rem;
+        }
+
+        .answer-form-row {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .answer-form-row input[type="text"] {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .owner-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .owner-toggle input[type="checkbox"] {
+            accent-color: var(--owner-badge);
+        }
+
+        .owner-password {
+            display: none;
+            max-width: 140px;
+        }
+
+        .owner-password.show {
+            display: block;
+        }
+
+        /* ── Empty State ── */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state .emoji {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .empty-state p {
+            font-size: 0.9rem;
+        }
+
+        /* ── Loading ── */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 0.5rem;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ── Toast Notification ── */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 1.5rem;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast.success {
+            border-color: var(--success);
+        }
+
+        .toast.error {
+            border-color: var(--danger);
+        }
+
+        /* ── Footer ── */
+        .footer {
+            text-align: center;
+            padding: 2rem 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            border-top: 1px solid var(--border);
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 640px) {
+            .hero h1 {
+                font-size: 1.4rem;
+            }
+
+            .question-main {
+                padding: 1rem 1.25rem;
+            }
+
+            .answers-list {
+                padding: 0.75rem 1.25rem;
+            }
+
+            .answer-form {
+                padding: 0.75rem 1.25rem;
+            }
+
+            .answer-form-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .header-stats {
+                display: none;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-inner">
+            <div class="header-brand">
+                <div class="header-logo"><span>Exthera</span> School</div>
+                <div class="header-badge">質問箱</div>
+            </div>
+            <div class="header-stats" id="headerStats"></div>
+        </div>
+    </header>
+
+    <!-- Main -->
+    <main class="main">
+        <!-- Hero -->
+        <div class="hero">
+            <h1>📬 質問箱</h1>
+            <p>臨床の疑問を気軽に投稿しよう。匿名でもOK！</p>
+        </div>
+
+        <!-- Question Form -->
+        <div class="question-form-card">
+            <div class="form-title">質問を投稿する</div>
+            <form id="questionForm">
+                <div class="form-row">
+                    <label class="form-label">名前<span class="optional">（任意 / 空欄で「匿名」）</span></label>
+                    <input type="text" id="qName" placeholder="例：PT 3年目" maxlength="30">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">質問内容</label>
+                    <textarea id="qContent" placeholder="例：膝OAの腫脹がある患者に、どの段階で荷重位トレーニングへ移行すべきですか？" maxlength="2000"
+                        required></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" id="qSubmitBtn">投稿する</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Question List -->
+        <div class="section-header">
+            <div class="section-title">💬 みんなの質問 <span class="question-count" id="questionCount">0</span></div>
+        </div>
+
+        <div id="questionList">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>読み込み中…</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        &copy; 2026 Exthera School. All rights reserved.
+    </footer>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- App Script -->
+    <script type="module">
+        // ─── Firebase Config ───
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFtbINGBRt-R066YzQA7n7eiABPwZakko",
+            authDomain: "exthera-qa-board.firebaseapp.com",
+            projectId: "exthera-qa-board",
+            storageBucket: "exthera-qa-board.firebasestorage.app",
+            messagingSenderId: "615198130096",
+            appId: "1:615198130096:web:bc20d803c8b0dea0aaa075"
+        };
+
+        const USE_FIREBASE = firebaseConfig.apiKey !== "";
+
+        // ─── Owner Password ───
+        const OWNER_PASSWORD = "exthera2026";
+
+        // ─── DOM Elements ───
+        const questionForm = document.getElementById('questionForm');
+        const qName = document.getElementById('qName');
+        const qContent = document.getElementById('qContent');
+        const qSubmitBtn = document.getElementById('qSubmitBtn');
+        const questionList = document.getElementById('questionList');
+        const questionCount = document.getElementById('questionCount');
+        const headerStats = document.getElementById('headerStats');
+        const toastEl = document.getElementById('toast');
+
+        // ─── Toast ───
+        function showToast(message, type = 'success') {
+            toastEl.textContent = message;
+            toastEl.className = `toast ${type} show`;
+            setTimeout(() => { toastEl.classList.remove('show'); }, 3000);
+        }
+
+        // ─── Time Format ───
+        function timeAgo(date) {
+            if (!date) return '';
+            if (typeof date === 'string') date = new Date(date);
+            if (date.toDate) date = date.toDate();
+            const now = new Date();
+            const diff = Math.floor((now - date) / 1000);
+            if (diff < 60) return 'たった今';
+            if (diff < 3600) return `${Math.floor(diff / 60)}分前`;
+            if (diff < 86400) return `${Math.floor(diff / 3600)}時間前`;
+            if (diff < 2592000) return `${Math.floor(diff / 86400)}日前`;
+            return date.toLocaleDateString('ja-JP');
+        }
+
+        function getInitial(name) {
+            if (!name || name === '匿名') return '?';
+            return name.charAt(0).toUpperCase();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text || '';
+            return div.innerHTML;
+        }
+
+        // ═══════════════════════════════════
+        //  localStorage Demo Mode
+        // ═══════════════════════════════════
+        const DEMO_QUESTIONS = [
+            {
+                id: 'demo-1',
+                name: 'PT 3年目',
+                content: '膝OAの腫脹がある患者（ストロークテスト Grade 2+）に、どの段階で荷重位トレーニングへ移行すべきですか？\nパテラセッティングだけでは改善が見られないのですが…',
+                createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+            },
+            {
+                id: 'demo-2',
+                name: '匿名',
+                content: '肩関節周囲炎（Freezing Phase）の患者に、どこまで可動域訓練をして良いのか判断できません。夜間時痛がある場合のアプローチを教えてください。',
+                createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString()
+            },
+            {
+                id: 'demo-3',
+                name: 'OT 5年目',
+                content: 'クラムシェルの角度別の使い分けについて質問です。ACL損傷後のリハとトレンデレンブルグ修正では、具体的にどう変えるべきですか？',
+                createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+            }
+        ];
+
+        const DEMO_ANSWERS = [
+            {
+                id: 'ans-1',
+                questionId: 'demo-1',
+                name: 'オーナー',
+                content: 'まずストロークテストでGrade 0〜1+に改善するまでは、腫脹管理（IPC、弾性ストッキング、等尺性収縮）を優先しましょう。\n\n腫脹がある状態では関節原性筋抑制（AMI）が働いているため、高負荷を加えても内側広筋は活性化しにくいです。\n\n移行の目安：\n① ストロークテスト Grade 1+ 以下\n② 膝伸展ラグが解消\n③ 等尺性収縮で代償なく実施可能\n\nこの3つが揃ったら、まずボール挟みセッティング → レッグエクステンション → スクワットと段階的に進めてください。',
+                isOwner: true,
+                createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString()
+            },
+            {
+                id: 'ans-2',
+                questionId: 'demo-1',
+                name: 'PT 8年目',
+                content: '私の経験でも、腫脹管理を先にやると筋トレの効果が全然違います。焦って荷重位に行くと逆効果になることが多かったです。',
+                isOwner: false,
+                createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString()
+            },
+            {
+                id: 'ans-3',
+                questionId: 'demo-3',
+                name: 'オーナー',
+                content: '良い質問ですね！同じクラムシェルでも目的で全く変わります。\n\n■ ACL損傷（Knee-in防止）の場合\n→ 最大開排位での強力な収縮が必須。浅い動きでは意味がありません。\n\n■ トレンデレンブルグ修正の場合\n→ 股関節屈曲位から中間位での収縮。歩行時の実際の筋活動角度に合わせます。\n\n「とりあえずクラムシェル」ではなく、「なぜその角度か」を考えることが大切です。',
+                isOwner: true,
+                createdAt: new Date(Date.now() - 20 * 60 * 60 * 1000).toISOString()
+            }
+        ];
+
+        function getLocalQuestions() {
+            const stored = localStorage.getItem('qa_questions');
+            if (stored) return JSON.parse(stored);
+            localStorage.setItem('qa_questions', JSON.stringify(DEMO_QUESTIONS));
+            return DEMO_QUESTIONS;
+        }
+
+        function getLocalAnswers() {
+            const stored = localStorage.getItem('qa_answers');
+            if (stored) return JSON.parse(stored);
+            localStorage.setItem('qa_answers', JSON.stringify(DEMO_ANSWERS));
+            return DEMO_ANSWERS;
+        }
+
+        function saveLocalQuestion(q) {
+            const questions = getLocalQuestions();
+            questions.unshift(q);
+            localStorage.setItem('qa_questions', JSON.stringify(questions));
+        }
+
+        function saveLocalAnswer(a) {
+            const answers = getLocalAnswers();
+            answers.push(a);
+            localStorage.setItem('qa_answers', JSON.stringify(answers));
+        }
+
+        // ═══════════════════════════════════
+        //  Render
+        // ═══════════════════════════════════
+        function renderQuestionCard(q, answers) {
+            const answerCnt = answers.length;
+            const card = document.createElement('div');
+            card.className = 'question-card';
+
+            const answersHtml = answerCnt > 0
+                ? answers.map(a => `
+                    <div class="answer-item ${a.isOwner ? 'is-owner' : ''}">
+                        <div class="answer-meta">
+                            <span class="answer-author">${escapeHtml(a.name)}</span>
+                            ${a.isOwner ? '<span class="owner-badge">OWNER</span>' : ''}
+                            <span>${timeAgo(a.createdAt)}</span>
+                        </div>
+                        <div class="answer-content">${escapeHtml(a.content)}</div>
+                    </div>
+                `).join('')
+                : '<div class="no-answers">まだ回答がありません</div>';
+
+            card.innerHTML = `
+                <div class="question-main" onclick="this.parentElement.querySelector('.answers-section').classList.toggle('open')">
+                    <div class="question-meta">
+                        <span class="question-author">
+                            <span class="avatar">${getInitial(q.name)}</span>
+                            ${escapeHtml(q.name)}
+                        </span>
+                        <span>${timeAgo(q.createdAt)}</span>
+                    </div>
+                    <div class="question-content">${escapeHtml(q.content)}</div>
+                    <div class="question-footer">
+                        <span class="answer-count-badge">💬 ${answerCnt}件の回答</span>
+                        <span class="expand-indicator">▼ タップして表示</span>
+                    </div>
+                </div>
+                <div class="answers-section">
+                    <div class="answers-list">${answersHtml}</div>
+                    <form class="answer-form" onsubmit="event.preventDefault(); window.__submitAnswer('${q.id}', this);">
+                        <textarea class="answer-content-input" placeholder="この質問に回答する…" maxlength="2000" required></textarea>
+                        <div class="answer-form-row">
+                            <input type="text" class="answer-name-input" placeholder="名前（任意）" maxlength="30">
+                            <label class="owner-toggle">
+                                <input type="checkbox" class="owner-check" onchange="this.closest('.answer-form').querySelector('.owner-pass-input').classList.toggle('show', this.checked)">
+                                オーナーとして回答
+                            </label>
+                            <input type="password" class="owner-pass-input owner-password" placeholder="パスワード">
+                            <button type="submit" class="btn btn-primary btn-sm answer-submit-btn">回答する</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            return card;
+        }
+
+        function renderAll(questions, allAnswers) {
+            questionList.innerHTML = '';
+            if (questions.length === 0) {
+                questionList.innerHTML = `
+                    <div class="empty-state">
+                        <span class="emoji">🤔</span>
+                        <p>まだ質問がありません。<br>最初の質問を投稿してみましょう！</p>
+                    </div>`;
+            } else {
+                questions.forEach(q => {
+                    const answers = (allAnswers[q.id] || []).sort((a, b) =>
+                        new Date(a.createdAt) - new Date(b.createdAt));
+                    questionList.appendChild(renderQuestionCard(q, answers));
+                });
+            }
+            const totalAnswers = Object.values(allAnswers).flat().length;
+            questionCount.textContent = questions.length;
+            headerStats.innerHTML = `<strong>${questions.length}</strong> 質問 · <strong>${totalAnswers}</strong> 回答`;
+        }
+
+        // ═══════════════════════════════════
+        //  Local Mode (Demo)
+        // ═══════════════════════════════════
+        function loadLocal() {
+            const questions = getLocalQuestions();
+            const answers = getLocalAnswers();
+            const grouped = {};
+            answers.forEach(a => {
+                if (!grouped[a.questionId]) grouped[a.questionId] = [];
+                grouped[a.questionId].push(a);
+            });
+            renderAll(questions, grouped);
+        }
+
+        function submitQuestionLocal(name, content) {
+            const q = {
+                id: 'q-' + Date.now(),
+                name: name || '匿名',
+                content,
+                createdAt: new Date().toISOString()
+            };
+            saveLocalQuestion(q);
+            loadLocal();
+        }
+
+        function submitAnswerLocal(questionId, name, content, isOwner) {
+            const a = {
+                id: 'a-' + Date.now(),
+                questionId,
+                name: isOwner ? 'オーナー' : (name || '匿名'),
+                content,
+                isOwner,
+                createdAt: new Date().toISOString()
+            };
+            saveLocalAnswer(a);
+            loadLocal();
+        }
+
+        // ═══════════════════════════════════
+        //  Firebase Mode
+        // ═══════════════════════════════════
+        let db = null;
+        let fbCollection, fbAddDoc, fbQuery, fbOrderBy, fbOnSnapshot, fbGetDocs, fbServerTimestamp;
+
+        async function initFirebase() {
+            const { initializeApp } = await import("https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js");
+            const fb = await import("https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js");
+            fbCollection = fb.collection;
+            fbAddDoc = fb.addDoc;
+            fbQuery = fb.query;
+            fbOrderBy = fb.orderBy;
+            fbOnSnapshot = fb.onSnapshot;
+            fbGetDocs = fb.getDocs;
+            fbServerTimestamp = fb.serverTimestamp;
+
+            const app = initializeApp(firebaseConfig);
+            db = fb.getFirestore(app);
+
+            // Listen for questions
+            const qRef = fbQuery(fbCollection(db, 'questions'), fbOrderBy('createdAt', 'desc'));
+            fbOnSnapshot(qRef, async () => {
+                const qSnap = await fbGetDocs(qRef);
+                const questions = [];
+                qSnap.forEach(doc => questions.push({ id: doc.id, ...doc.data() }));
+
+                const aSnap = await fbGetDocs(fbCollection(db, 'answers'));
+                const grouped = {};
+                aSnap.forEach(doc => {
+                    const d = doc.data();
+                    if (!grouped[d.questionId]) grouped[d.questionId] = [];
+                    grouped[d.questionId].push(d);
+                });
+                renderAll(questions, grouped);
+            });
+
+            fbOnSnapshot(fbCollection(db, 'answers'), async () => {
+                const qRef2 = fbQuery(fbCollection(db, 'questions'), fbOrderBy('createdAt', 'desc'));
+                const qSnap = await fbGetDocs(qRef2);
+                const questions = [];
+                qSnap.forEach(doc => questions.push({ id: doc.id, ...doc.data() }));
+                const aSnap = await fbGetDocs(fbCollection(db, 'answers'));
+                const grouped = {};
+                aSnap.forEach(doc => {
+                    const d = doc.data();
+                    if (!grouped[d.questionId]) grouped[d.questionId] = [];
+                    grouped[d.questionId].push(d);
+                });
+                renderAll(questions, grouped);
+            });
+        }
+
+        // ═══════════════════════════════════
+        //  Event Handlers
+        // ═══════════════════════════════════
+        questionForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const content = qContent.value.trim();
+            if (!content) return;
+            qSubmitBtn.disabled = true;
+            qSubmitBtn.textContent = '投稿中…';
+            try {
+                if (USE_FIREBASE && db) {
+                    await fbAddDoc(fbCollection(db, 'questions'), {
+                        name: qName.value.trim() || '匿名',
+                        content,
+                        createdAt: fbServerTimestamp()
+                    });
+                } else {
+                    submitQuestionLocal(qName.value.trim(), content);
+                }
+                qName.value = '';
+                qContent.value = '';
+                showToast('✅ 質問を投稿しました！');
+            } catch (err) {
+                console.error(err);
+                showToast('❌ 投稿に失敗しました', 'error');
+            } finally {
+                qSubmitBtn.disabled = false;
+                qSubmitBtn.textContent = '投稿する';
+            }
+        });
+
+        window.__submitAnswer = async function (questionId, formEl) {
+            const contentEl = formEl.querySelector('.answer-content-input');
+            const nameEl = formEl.querySelector('.answer-name-input');
+            const ownerCheck = formEl.querySelector('.owner-check');
+            const ownerPassEl = formEl.querySelector('.owner-pass-input');
+            const submitBtn = formEl.querySelector('.answer-submit-btn');
+            const content = contentEl.value.trim();
+            if (!content) return;
+
+            let isOwner = false;
+            if (ownerCheck && ownerCheck.checked) {
+                if ((ownerPassEl ? ownerPassEl.value : '') !== OWNER_PASSWORD) {
+                    showToast('❌ オーナーパスワードが違います', 'error');
+                    return;
+                }
+                isOwner = true;
+            }
+            submitBtn.disabled = true;
+            submitBtn.textContent = '投稿中…';
+            try {
+                if (USE_FIREBASE && db) {
+                    await fbAddDoc(fbCollection(db, 'answers'), {
+                        questionId,
+                        name: isOwner ? 'オーナー' : (nameEl.value.trim() || '匿名'),
+                        content,
+                        isOwner,
+                        createdAt: fbServerTimestamp()
+                    });
+                } else {
+                    submitAnswerLocal(questionId, nameEl.value.trim(), content, isOwner);
+                }
+                contentEl.value = '';
+                nameEl.value = '';
+                if (ownerCheck) ownerCheck.checked = false;
+                if (ownerPassEl) ownerPassEl.classList.remove('show');
+                showToast('✅ 回答を投稿しました！');
+            } catch (err) {
+                console.error(err);
+                showToast('❌ 投稿に失敗しました', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '回答する';
+            }
+        };
+
+        // ─── Init ───
+        if (USE_FIREBASE) {
+            initFirebase();
+        } else {
+            loadLocal();
+        }
+    </script>
+
+</body>
+
+</html>
