@@ -876,10 +876,13 @@
                         <div class="answer-form-row">
                             <input type="text" class="answer-name-input" placeholder="名前（任意）" maxlength="30">
                             <label class="owner-toggle">
-                                <input type="checkbox" class="owner-check" onchange="this.closest('.answer-form').querySelector('.owner-pass-input').classList.toggle('show', this.checked)">
+                                <input type="checkbox" class="owner-check" onchange="this.closest('.answer-form').querySelector('.owner-pass-container').classList.toggle('show', this.checked)">
                                 オーナーとして回答
                             </label>
-                            <input type="password" class="owner-pass-input owner-password" placeholder="パスワード">
+                            <div class="owner-pass-container owner-password">
+                                <input type="text" name="username" value="owner" autocomplete="username" style="display:none;" aria-hidden="true">
+                                <input type="password" name="password" class="owner-pass-input" placeholder="パスワード" autocomplete="current-password">
+                            </div>
                             <button type="submit" class="btn btn-primary btn-sm answer-submit-btn">回答する</button>
                         </div>
                     </form>
